@@ -8,71 +8,11 @@
 #include "utils.h"
 #include "x25519_ref10.h"
 
-/*
- * Reject small order points early to mitigate the implications of
- * unexpected optimizations that would affect the ref10 code.
- * See https://eprint.iacr.org/2017/806.pdf for reference.
- */
-static int
-has_small_order(const unsigned char s[32])
-{
-    CRYPTO_ALIGN(16)
-    static const unsigned char blocklist[][32] = {
-        /* 0 (order 4) */
-        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
-        /* 1 (order 1) */
-        { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
-        /* 325606250916557431795983626356110631294008115727848805560023387167927233504
-           (order 8) */
-        { 0xe0, 0xeb, 0x7a, 0x7c, 0x3b, 0x41, 0xb8, 0xae, 0x16, 0x56, 0xe3,
-          0xfa, 0xf1, 0x9f, 0xc4, 0x6a, 0xda, 0x09, 0x8d, 0xeb, 0x9c, 0x32,
-          0xb1, 0xfd, 0x86, 0x62, 0x05, 0x16, 0x5f, 0x49, 0xb8, 0x00 },
-        /* 39382357235489614581723060781553021112529911719440698176882885853963445705823
-           (order 8) */
-        { 0x5f, 0x9c, 0x95, 0xbc, 0xa3, 0x50, 0x8c, 0x24, 0xb1, 0xd0, 0xb1,
-          0x55, 0x9c, 0x83, 0xef, 0x5b, 0x04, 0x44, 0x5c, 0xc4, 0x58, 0x1c,
-          0x8e, 0x86, 0xd8, 0x22, 0x4e, 0xdd, 0xd0, 0x9f, 0x11, 0x57 },
-        /* p-1 (order 2) */
-        { 0xec, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f },
-        /* p (=0, order 4) */
-        { 0xed, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f },
-        /* p+1 (=1, order 1) */
-        { 0xee, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f }
-    };
-    unsigned char c[7] = { 0 };
-    unsigned int  k;
-    size_t        i, j;
-
-    COMPILER_ASSERT(7 == sizeof blocklist / sizeof blocklist[0]);
-    for (j = 0; j < 31; j++) {
-        for (i = 0; i < sizeof blocklist / sizeof blocklist[0]; i++) {
-            c[i] |= s[j] ^ blocklist[i][j];
-        }
-    }
-    for (i = 0; i < sizeof blocklist / sizeof blocklist[0]; i++) {
-        c[i] |= (s[j] & 0x7f) ^ blocklist[i][j];
-    }
-    k = 0;
-    for (i = 0; i < sizeof blocklist / sizeof blocklist[0]; i++) {
-        k |= (c[i] - 1);
-    }
-    return (int) ((k >> 8) & 1);
-}
-
 static int
 crypto_scalarmult_curve25519_ref10(unsigned char *q,
                                    const unsigned char *n,
-                                   const unsigned char *p)
+                                   const unsigned char *p,
+                                   const int bits)
 {
     unsigned char *t = q;
     unsigned int   i;
@@ -82,15 +22,6 @@ crypto_scalarmult_curve25519_ref10(unsigned char *q,
     unsigned int   swap;
     unsigned int   bit;
 
-    if (has_small_order(p)) {
-        return -1;
-    }
-    for (i = 0; i < 32; i++) {
-        t[i] = n[i];
-    }
-    t[0] &= 248;
-    t[31] &= 127;
-    t[31] |= 64;
     fe25519_frombytes(x1, p);
     fe25519_1(x2);
     fe25519_0(z2);
@@ -98,8 +29,8 @@ crypto_scalarmult_curve25519_ref10(unsigned char *q,
     fe25519_1(z3);
 
     swap = 0;
-    for (pos = 254; pos >= 0; --pos) {
-        bit = t[pos / 8] >> (pos & 7);
+    for (pos = bits - 1; pos >= 0; --pos) {
+        bit = n[pos / 8] >> (pos & 7);
         bit &= 1;
         swap ^= bit;
         fe25519_cswap(x2, x3, swap);
@@ -150,18 +81,11 @@ static int
 crypto_scalarmult_curve25519_ref10_base(unsigned char *q,
                                         const unsigned char *n)
 {
-    unsigned char *t = q;
     ge25519_p3     A;
     fe25519        pk;
     unsigned int   i;
 
-    for (i = 0; i < 32; i++) {
-        t[i] = n[i];
-    }
-    t[0] &= 248;
-    t[31] &= 127;
-    t[31] |= 64;
-    ge25519_scalarmult_base(&A, t);
+    ge25519_scalarmult_base(&A, n);
     edwards_to_montgomery(pk, A.Y, A.Z);
     fe25519_tobytes(q, pk);
 

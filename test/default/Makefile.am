@@ -58,6 +58,7 @@ EXTRA_DIST = \
 	randombytes.exp \
 	scalarmult.exp \
 	scalarmult_ed25519.exp \
+	scalarmult_noclamp.exp \
 	scalarmult_ristretto255.exp \
 	scalarmult2.exp \
 	scalarmult5.exp \
@@ -142,6 +143,7 @@ DISTCLEANFILES = \
 	randombytes.res \
 	scalarmult.res \
 	scalarmult_ed25519.res \
+	scalarmult_noclamp.res \
 	scalarmult_ristretto255.res \
 	scalarmult2.res \
 	scalarmult5.res \
@@ -228,6 +230,7 @@ TESTS_TARGETS = \
 	pwhash_argon2id \
 	randombytes \
 	scalarmult \
+	scalarmult_noclamp \
 	scalarmult2 \
 	scalarmult5 \
 	scalarmult6 \
@@ -425,6 +428,9 @@ scalarmult_LDADD          = $(TESTS_LDADD)
 
 scalarmult_ed25519_SOURCE = cmptest.h scalarmult_ed25519.c
 scalarmult_ed25519_LDADD  = $(TESTS_LDADD)
+
+scalarmult_noclamp_SOURCE = cmptest.h scalarmult_noclamp.c
+scalarmult_noclamp_LDADD  = $(TESTS_LDADD)
 
 scalarmult_ristretto255_SOURCE = cmptest.h scalarmult_ristretto255.c
 scalarmult_ristretto255_LDADD  = $(TESTS_LDADD)

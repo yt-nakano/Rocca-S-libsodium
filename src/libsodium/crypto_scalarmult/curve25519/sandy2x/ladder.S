@@ -19,12 +19,13 @@ _ladder:
 
 mov %rsp,%r11
 and $31,%r11
-add $1856,%r11
+add $1864,%r11
 sub %r11,%rsp
 movq %r11,1824(%rsp)
 movq %r12,1832(%rsp)
 movq %r13,1840(%rsp)
 movq %r14,1848(%rsp)
+movq %rdx,1856(%rsp)
 vmovdqa v0_0(%rip),%xmm0
 vmovdqa v1_0(%rip),%xmm1
 vmovdqu 0(%rdi),%xmm2
@@ -136,7 +137,7 @@ movl   %r13d,768(%rsi)
 add  $4,%rsi
 sub  $1,%rax
 jne ._ladder_small_loop
-mov  $255,%rdx
+movq 1856(%rsp),%rdx
 add  $760,%rsi
 
 .p2align 4

@@ -144,6 +144,7 @@ test/default/scalarmult6
 test/default/scalarmult7
 test/default/scalarmult8
 test/default/scalarmult_ed25519
+test/default/scalarmult_noclamp
 test/default/scalarmult_ristretto255
 test/default/secretbox
 test/default/secretbox2

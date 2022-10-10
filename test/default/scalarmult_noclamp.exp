@@ -1,0 +1,3 @@
+crypto_scalarmult_curve25519_base(0) passed
+crypto_scalarmult_curve25519(0) passed
+OK

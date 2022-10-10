@@ -419,10 +419,14 @@ _crypto_pwhash_str_verify 1 1
 _crypto_pwhash_strbytes 1 1
 _crypto_pwhash_strprefix 1 1
 _crypto_scalarmult 1 1
+_crypto_scalarmult_noclamp 0 1
 _crypto_scalarmult_base 1 1
+_crypto_scalarmult_base_noclamp 0 1
 _crypto_scalarmult_bytes 1 1
 _crypto_scalarmult_curve25519 0 1
+_crypto_scalarmult_curve25519_noclamp 0 1
 _crypto_scalarmult_curve25519_base 0 1
+_crypto_scalarmult_curve25519_base_noclamp 0 1
 _crypto_scalarmult_curve25519_bytes 0 1
 _crypto_scalarmult_curve25519_scalarbytes 0 1
 _crypto_scalarmult_ed25519 0 1

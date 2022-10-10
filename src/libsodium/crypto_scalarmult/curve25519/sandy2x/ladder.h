@@ -8,7 +8,7 @@ extern "C" {
 #include "fe.h"
 #include "ladder_namespace.h"
 
-extern void ladder(fe *, const unsigned char *);
+extern void ladder(fe *, const unsigned char *, const int);
 
 #ifdef __cplusplus
 }
