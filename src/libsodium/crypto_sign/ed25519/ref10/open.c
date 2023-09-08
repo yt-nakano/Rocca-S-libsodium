@@ -16,7 +16,9 @@ _crypto_sign_ed25519_verify_detached(const unsigned char *sig,
                                      const unsigned char *m,
                                      unsigned long long   mlen,
                                      const unsigned char *pk,
-                                     int prehashed)
+                                     const char          *ctx,
+                                     size_t               ctxlen,
+                                     unsigned char        prehashed)
 {
     crypto_hash_sha512_state hs;
     unsigned char            h[64];
@@ -25,6 +27,12 @@ _crypto_sign_ed25519_verify_detached(const unsigned char *sig,
     ge25519_p3               A;
     ge25519_p3               sb_ah;
     ge25519_p2               sb_ah_p2;
+    unsigned char            ctxlen_u8;
+
+    if (ctxlen > crypto_sign_ed25519_CONTEXTBYTES_MAX) {
+        return -1;
+    }
+    ctxlen_u8 = (unsigned char) ctxlen;
 
     ACQUIRE_FENCE;
 #ifdef ED25519_COMPAT
@@ -48,7 +56,7 @@ _crypto_sign_ed25519_verify_detached(const unsigned char *sig,
         ge25519_has_small_order(&expected_r) != 0) {
         return -1;
     }
-    _crypto_sign_ed25519_ref10_hinit(&hs, prehashed);
+    _crypto_sign_ed25519_ref10_hinit(&hs, ctx, ctxlen_u8, prehashed);
     crypto_hash_sha512_update(&hs, sig, 32);
     crypto_hash_sha512_update(&hs, pk, 32);
     crypto_hash_sha512_update(&hs, m, mlen);
@@ -68,7 +76,7 @@ crypto_sign_ed25519_verify_detached(const unsigned char *sig,
                                     unsigned long long   mlen,
                                     const unsigned char *pk)
 {
-    return _crypto_sign_ed25519_verify_detached(sig, m, mlen, pk, 0);
+    return _crypto_sign_ed25519_verify_detached(sig, m, mlen, pk, NULL, 0, 0);
 }
 
 int

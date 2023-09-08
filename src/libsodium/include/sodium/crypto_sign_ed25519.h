@@ -39,6 +39,10 @@ size_t crypto_sign_ed25519_secretkeybytes(void);
 SODIUM_EXPORT
 size_t crypto_sign_ed25519_messagebytes_max(void);
 
+#define crypto_sign_ed25519_CONTEXTBYTES_MAX 255
+SODIUM_EXPORT
+size_t crypto_sign_ed25519_contextbytes_max(void);
+
 SODIUM_EXPORT
 int crypto_sign_ed25519(unsigned char *sm, unsigned long long *smlen_p,
                         const unsigned char *m, unsigned long long mlen,
@@ -112,9 +116,24 @@ int crypto_sign_ed25519ph_final_create(crypto_sign_ed25519ph_state *state,
             __attribute__ ((nonnull(1, 2, 4)));
 
 SODIUM_EXPORT
+int crypto_sign_ed25519ph_ctx_final_create(crypto_sign_ed25519ph_state *state,
+                                           unsigned char *sig,
+                                           unsigned long long *siglen_p,
+                                           const unsigned char *sk,
+                                           const char *ctx, size_t ctxlen)
+            __attribute__ ((nonnull(1, 2, 4, 5)));
+
+SODIUM_EXPORT
 int crypto_sign_ed25519ph_final_verify(crypto_sign_ed25519ph_state *state,
                                        const unsigned char *sig,
                                        const unsigned char *pk)
+            __attribute__ ((warn_unused_result)) __attribute__ ((nonnull));
+
+SODIUM_EXPORT
+int crypto_sign_ed25519ph_ctx_final_verify(crypto_sign_ed25519ph_state *state,
+                                           const unsigned char *sig,
+                                           const unsigned char *pk,
+                                           const char *ctx, size_t ctxlen)
             __attribute__ ((warn_unused_result)) __attribute__ ((nonnull));
 
 #ifdef __cplusplus

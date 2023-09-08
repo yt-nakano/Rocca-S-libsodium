@@ -41,6 +41,12 @@ crypto_sign_ed25519_messagebytes_max(void)
     return crypto_sign_ed25519_MESSAGEBYTES_MAX;
 }
 
+size_t
+crypto_sign_ed25519_contextbytes_max(void)
+{
+    return crypto_sign_ed25519_CONTEXTBYTES_MAX;
+}
+
 int
 crypto_sign_ed25519_sk_to_seed(unsigned char *seed, const unsigned char *sk)
 {
@@ -81,7 +87,24 @@ crypto_sign_ed25519ph_final_create(crypto_sign_ed25519ph_state *state,
 
     crypto_hash_sha512_final(&state->hs, ph);
 
-    return _crypto_sign_ed25519_detached(sig, siglen_p, ph, sizeof ph, sk, 1);
+    return _crypto_sign_ed25519_detached(sig, siglen_p, ph, sizeof ph, sk,
+                                         NULL, 0U, 1);
+}
+
+int
+crypto_sign_ed25519ph_ctx_final_create(crypto_sign_ed25519ph_state *state,
+                                       unsigned char               *sig,
+                                       unsigned long long          *siglen_p,
+                                       const unsigned char         *sk,
+                                       const char                  *ctx,
+                                       size_t                      ctxlen)
+{
+    unsigned char ph[crypto_hash_sha512_BYTES];
+
+    crypto_hash_sha512_final(&state->hs, ph);
+
+    return _crypto_sign_ed25519_detached(sig, siglen_p, ph, sizeof ph, sk,
+                                         ctx, ctxlen, 1);
 }
 
 int
@@ -93,5 +116,21 @@ crypto_sign_ed25519ph_final_verify(crypto_sign_ed25519ph_state *state,
 
     crypto_hash_sha512_final(&state->hs, ph);
 
-    return _crypto_sign_ed25519_verify_detached(sig, ph, sizeof ph, pk, 1);
+    return _crypto_sign_ed25519_verify_detached(sig, ph, sizeof ph, pk,
+                                                NULL, 0U, 1);
+}
+
+int
+crypto_sign_ed25519ph_ctx_final_verify(crypto_sign_ed25519ph_state *state,
+                                       const unsigned char         *sig,
+                                       const unsigned char         *pk,
+                                       const char                  *ctx,
+                                       size_t                      ctxlen)
+{
+    unsigned char ph[crypto_hash_sha512_BYTES];
+
+    crypto_hash_sha512_final(&state->hs, ph);
+
+    return _crypto_sign_ed25519_verify_detached(sig, ph, sizeof ph, pk,
+                                                ctx, ctxlen, 1);
 }

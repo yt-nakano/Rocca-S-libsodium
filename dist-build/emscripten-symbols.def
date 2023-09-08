@@ -505,6 +505,7 @@ _crypto_sign_bytes 1 1
 _crypto_sign_detached 1 1
 _crypto_sign_ed25519 0 1
 _crypto_sign_ed25519_bytes 0 1
+_crypto_sign_ed25519_contextbytes_max 0 1
 _crypto_sign_ed25519_detached 0 1
 _crypto_sign_ed25519_keypair 0 1
 _crypto_sign_ed25519_messagebytes_max 0 1
@@ -519,6 +520,8 @@ _crypto_sign_ed25519_sk_to_pk 0 1
 _crypto_sign_ed25519_sk_to_seed 0 1
 _crypto_sign_ed25519_verify_detached 0 1
 _crypto_sign_ed25519ph_final_create 0 1
+_crypto_sign_ed25519ph_ctx_final_create 0 1
+_crypto_sign_ed25519ph_ctx_final_verify 0 1
 _crypto_sign_ed25519ph_final_verify 0 1
 _crypto_sign_ed25519ph_init 0 1
 _crypto_sign_ed25519ph_statebytes 0 1

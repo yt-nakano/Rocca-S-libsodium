@@ -9,18 +9,30 @@
 #include "utils.h"
 
 void
-_crypto_sign_ed25519_ref10_hinit(crypto_hash_sha512_state *hs, int prehashed)
+_crypto_sign_ed25519_ref10_hinit(crypto_hash_sha512_state *hs,
+                                 const char *ctx, unsigned char ctxlen_u8,
+                                 unsigned char prehashed)
 {
-    static const unsigned char DOM2PREFIX[32 + 2] = {
+    static const unsigned char DOM2PREFIX[32] = {
         'S', 'i', 'g', 'E', 'd', '2', '5', '5', '1', '9', ' ',
         'n', 'o', ' ',
         'E', 'd', '2', '5', '5', '1', '9', ' ',
-        'c', 'o', 'l', 'l', 'i', 's', 'i', 'o', 'n', 's', 1, 0
+        'c', 'o', 'l', 'l', 'i', 's', 'i', 'o', 'n', 's'
     };
 
     crypto_hash_sha512_init(hs);
-    if (prehashed) {
+    if (prehashed || ctx != NULL) {
+        unsigned char ph_ctxlen[2];
+
+        ph_ctxlen[0] = prehashed;
+        ph_ctxlen[1] = ctxlen_u8;
+
         crypto_hash_sha512_update(hs, DOM2PREFIX, sizeof DOM2PREFIX);
+        crypto_hash_sha512_update(hs, ph_ctxlen, 2U);
+        if (ctx != NULL) {
+            crypto_hash_sha512_update(hs, (const unsigned char *) ctx,
+                                      (size_t) ctxlen_u8);
+        }
     }
 }
 
@@ -49,15 +61,23 @@ _crypto_sign_ed25519_synthetic_r_hv(crypto_hash_sha512_state *hs,
 int
 _crypto_sign_ed25519_detached(unsigned char *sig, unsigned long long *siglen_p,
                               const unsigned char *m, unsigned long long mlen,
-                              const unsigned char *sk, int prehashed)
+                              const unsigned char *sk,
+                              const char *ctx, size_t ctxlen,
+                              unsigned char prehashed)
 {
     crypto_hash_sha512_state hs;
     unsigned char            az[64];
     unsigned char            nonce[64];
     unsigned char            hram[64];
     ge25519_p3               R;
+    unsigned char            ctxlen_u8;
 
-    _crypto_sign_ed25519_ref10_hinit(&hs, prehashed);
+    if (ctxlen > crypto_sign_ed25519_CONTEXTBYTES_MAX) {
+        return -1;
+    }
+    ctxlen_u8 = (unsigned char) ctxlen;
+
+    _crypto_sign_ed25519_ref10_hinit(&hs, ctx, ctxlen_u8, prehashed);
 
     crypto_hash_sha512(az, sk, 32);
 #ifdef ED25519_NONDETERMINISTIC
@@ -75,7 +95,7 @@ _crypto_sign_ed25519_detached(unsigned char *sig, unsigned long long *siglen_p,
     ge25519_scalarmult_base(&R, nonce);
     ge25519_p3_tobytes(sig, &R);
 
-    _crypto_sign_ed25519_ref10_hinit(&hs, prehashed);
+    _crypto_sign_ed25519_ref10_hinit(&hs, ctx, ctxlen_u8, prehashed);
     crypto_hash_sha512_update(&hs, sig, 64);
     crypto_hash_sha512_update(&hs, m, mlen);
     crypto_hash_sha512_final(&hs, hram);
@@ -98,7 +118,8 @@ crypto_sign_ed25519_detached(unsigned char *sig, unsigned long long *siglen_p,
                              const unsigned char *m, unsigned long long mlen,
                              const unsigned char *sk)
 {
-    return _crypto_sign_ed25519_detached(sig, siglen_p, m, mlen, sk, 0);
+    return _crypto_sign_ed25519_detached(sig, siglen_p, m, mlen, sk,
+                                         NULL, 0U, 0);
 }
 
 int
