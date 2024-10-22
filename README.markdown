@@ -27,6 +27,7 @@ The documentation is available on Gitbook and built from the
 [libsodium-doc](https://github.com/jedisct1/libsodium-doc) repository:
 
 * [libsodium documentation](https://doc.libsodium.org) - online, requires Javascript.
+* [Rocca-S-libsodium-doc](https://github.com/yt-nakano/Rocca-S-libsodium-doc) - repository with Rocca-S added.
 
 ## Integrity Checking
 

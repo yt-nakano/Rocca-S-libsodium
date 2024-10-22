@@ -65,6 +65,16 @@ _crypto_aead_xchacha20poly1305_ietf_keygen 1 1
 _crypto_aead_xchacha20poly1305_ietf_messagebytes_max 1 1
 _crypto_aead_xchacha20poly1305_ietf_npubbytes 1 1
 _crypto_aead_xchacha20poly1305_ietf_nsecbytes 1 1
+_crypto_aead_roccas_abytes 0 0
+_crypto_aead_roccas_decrypt 0 0
+_crypto_aead_roccas_decrypt_detached 0 0
+_crypto_aead_roccas_encrypt 0 0
+_crypto_aead_roccas_encrypt_detached 0 0
+_crypto_aead_roccas_keybytes 0 0
+_crypto_aead_roccas_keygen 0 0
+_crypto_aead_roccas_messagebytes_max 0 0
+_crypto_aead_roccas_npubbytes 0 0
+_crypto_aead_roccas_nsecbytes 0 0
 _crypto_auth 1 1
 _crypto_auth_bytes 1 1
 _crypto_auth_hmacsha256 0 1

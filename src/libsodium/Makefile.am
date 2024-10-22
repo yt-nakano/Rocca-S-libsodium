@@ -15,6 +15,7 @@ libsodium_la_SOURCES = \
 	crypto_aead/aes256gcm/aead_aes256gcm.c \
 	crypto_aead/chacha20poly1305/aead_chacha20poly1305.c \
 	crypto_aead/xchacha20poly1305/aead_xchacha20poly1305.c \
+	crypto_aead/roccas/aead_roccas.c \
 	crypto_auth/crypto_auth.c \
 	crypto_auth/hmacsha256/auth_hmacsha256.c \
 	crypto_auth/hmacsha512/auth_hmacsha512.c \
@@ -107,6 +108,8 @@ libsodium_la_SOURCES = \
 	include/sodium/private/sse2_64_32.h \
 	include/sodium/private/softaes.h \
 	include/sodium/private/quirks.h \
+	include/sodium/private/rocca_simd_c.h \
+	include/sodium/private/rocca.h \
 	randombytes/randombytes.c \
 	sodium/codecs.c \
 	sodium/core.c \
@@ -246,7 +249,8 @@ libaesni_la_SOURCES = \
 	crypto_aead/aegis128l/aegis128l_aesni.h \
 	crypto_aead/aegis256/aegis256_aesni.c \
 	crypto_aead/aegis256/aegis256_aesni.h \
-	crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c
+	crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c \
+	crypto_aead/roccas/aesni/aead_roccas_aesni.c
 
 libsse2_la_LDFLAGS = $(libsodium_la_LDFLAGS)
 libsse2_la_CPPFLAGS = $(libsodium_la_CPPFLAGS) \
